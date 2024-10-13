@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "994939095037",
+    "project_id": "tharseo-mobile",
+    "storage_bucket": "tharseo-mobile.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:994939095037:android:d93dd74ba38e2237497b94",
+        "android_client_info": {
+          "package_name": "com.tharseo_frontend_mobile_v1"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "994939095037-2mnq9rn89u25qr5erpp091slqejm7dok.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.tharseo_frontend_mobile_v1",
+            "certificate_hash": "5e8f16062ea3cd2c4a0d547876baa6f38cabf625"
+          }
+        },
+        {
+          "client_id": "994939095037-51i8qgua6rv3p3nn8biuoe8fe6rqdc4c.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDrp7BnqjPpuocZ87sm3BoCGbeLh4Yp49E"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "994939095037-51i8qgua6rv3p3nn8biuoe8fe6rqdc4c.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
