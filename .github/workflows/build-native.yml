@@ -113,8 +113,8 @@ jobs:
               fi
               
               # Iniciar o servidor HTTP
-              nohup python3 /home/tharseo/apk/download_server.py &
-              echo "Servidor iniciado na porta 8500."
+             nohup python3 /home/tharseo/apk/download_server.py > /dev/null 2>&1 &
+             echo "Servidor iniciado na porta 8500 em segundo plano."
             fi
 
       # Step 13: List download link
