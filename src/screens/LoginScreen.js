@@ -34,7 +34,7 @@ export default function LoginScreen() {
   //Function to feat the login with user and password
   const handleLogin = async () => {
 
-    const urlRequest = `http://10.0.2.2:8080/authenticate/auth`;
+    const urlRequest = `${serverConfig.addressServerTharseo}/authenticate/auth`;
     try {
       const response = await fetch(urlRequest, {
         method: "POST",
@@ -73,7 +73,7 @@ export default function LoginScreen() {
 
       try {
         const response = await fetch(
-          `http://10.0.2.2:8080/googleauth/auth2`,
+          `${serverConfig.addressServerTharseo}/googleauth/auth2`,
           {
             method: 'POST',
             headers: {
