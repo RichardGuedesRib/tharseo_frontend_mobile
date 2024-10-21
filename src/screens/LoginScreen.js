@@ -6,10 +6,21 @@ import {
   statusCodes,
 } from '@react-native-google-signin/google-signin';
 import serverConfig from '../services/ServerConfig';
+import { useAuthStore } from '../stores/useAuthStore';
+import { useStrategyGridStore } from '../stores/useStrategyGridStore';
+import { useTransactionStore } from '../stores/useTransactionStore';
+import { useUserWalletStore } from '../stores/useUserWalletStore';
+import { useNavigation } from '@react-navigation/native';
 
-export default function LoginScreen({navigation}) {
+
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const { setAuth, id, name, lastname, token, expiration } = useAuthStore();
+  const { setGrids, grids } = useStrategyGridStore();
+  const { setTransactions, transactions } = useTransactionStore();
+  const { setAssets, assets } = useUserWalletStore();
+  const navigation = useNavigation();
 
   useEffect(() => {
     GoogleSignin.configure({
@@ -20,20 +31,12 @@ export default function LoginScreen({navigation}) {
     });
   }, []);
 
-  // const handleLogin = async () => {
-  //   try {
-  //     await auth().signInWithEmailAndPassword(email, password);
-  //     navigation.replace('Home');
-  //   } catch (error) {
-  //     console.error(error);
-  //   }
-  // };
-
+  //Function to feat the login with user and password
   const handleLogin = async () => {
 
-    const urlRequest = `http://10.0.2.2:8080/authenticate/checkpassword`;
+    const urlRequest = `http://10.0.2.2:8080/authenticate/auth`;
     try {
-      const request = await fetch(urlRequest, {
+      const response = await fetch(urlRequest, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -41,18 +44,21 @@ export default function LoginScreen({navigation}) {
           password: password,
         }),
       });
-      if (!request.ok) {
+
+      if (!response.ok) {
         alert("Usuário ou Senha Inválidos");
       } else {
-       console.log(request);
-          navigation.replace('Home');
-      }
+        const data = await response.json();
+        setUser(data);
+        navigation.navigate('Home');
+      };
+    
     } catch (error) {
       console.error(error);
     }
   }
  
-
+  //Functio to feat the login with google auth
   const handleGoogleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -64,7 +70,6 @@ export default function LoginScreen({navigation}) {
       const googleCredential = auth.GoogleAuthProvider.credential(
         userInfo.data.idToken,
       );
-      // await auth().signInWithCredential(googleCredential);
 
       try {
         const response = await fetch(
@@ -83,8 +88,8 @@ export default function LoginScreen({navigation}) {
         if (response.ok) {
           console.log('Login Successful:', data);
 
-          setUser(data.data);
-          navigate('/home');
+          setUser(data);
+          navigation.navigate('Home');
         } else {
           const errorData = await response.json();
           console.error('Login Failed:', errorData.message);
@@ -104,6 +109,28 @@ export default function LoginScreen({navigation}) {
       }
     }
   };
+
+  //Function to get data from server and set store on zustand
+  const setUser = (data) => {
+    
+    const { user, accessToken, expiresIn } = data.data;
+    const { id, name, lastname, wallet, grids, transactions } = user;
+
+    console.log("data", data);
+      
+      setAuth({
+        id,
+        name,
+        lastname,
+        token: accessToken,
+        expiration: new Date().getTime() + expiresIn * 1000, 
+      });
+
+      setGrids(grids);
+      setTransactions(transactions);
+      setAssets(wallet);
+
+  }
 
   return (
     <View style={{flex: 1, justifyContent: 'center', alignItems: 'center'}}>
