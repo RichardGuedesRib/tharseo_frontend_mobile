@@ -84,6 +84,7 @@ export default function LoginScreen() {
         );
 
         const data = await response.json();
+        console.log("RETURNDATA", data);
 
         if (response.ok) {
           console.log('Login Successful:', data);

@@ -102,9 +102,11 @@ jobs:
             if lsof -i :8500; then
               echo "Servidor já está rodando na porta 8500. Nenhuma ação necessária."
             else
-              echo "Servidor não está rodando. Substituindo o script e iniciando o servidor."
+              echo "Servidor não está rodando. Tentando iniciar o servidor."
+              # Parar quaisquer instâncias anteriores
+              fuser -k 8500/tcp || true
               
-              # Verificar se o script já está presente e substituir se necessário
+              # Substituir o script e iniciar o servidor
               if [ -f /home/tharseo/apk/download_server.py ]; then
                 echo "Substituindo o script download_server.py existente."
               else
@@ -113,9 +115,18 @@ jobs:
               fi
               
               # Iniciar o servidor HTTP
-              nohup python3 /home/tharseo/apk/download_server.py > /dev/null 2>&1 &
-              echo "Servidor iniciado na porta 8500 em segundo plano."
+              chmod +x /home/tharseo/apk/download_server.py
+              nohup python3 /home/tharseo/apk/download_server.py > /home/tharseo/apk/server.log 2>&1 &
+              
+              # Verifique o status do servidor
+              sleep 2
+              if lsof -i :8500; then
+                echo "Servidor HTTP iniciado com sucesso na porta 8500."
+              else
+                echo "Falha ao iniciar o servidor HTTP na porta 8500."
+              fi
             fi
+
 
       # Step 13: List download link
       - name: List download link
