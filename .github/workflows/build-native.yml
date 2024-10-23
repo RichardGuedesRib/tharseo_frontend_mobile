@@ -108,7 +108,7 @@ jobs:
       - name: Notify on success with link to APK
         if: success()
         run: |
-          ARTIFACT_URL="http://52.168.150.124:8500/app-release.apk"
+          ARTIFACT_URL="http://tharseo.zapto.org:8500/app-release.apk"
           MESSAGE="🎉 A nova versão de desenvolvimento do aplicativo foi buildada com sucesso! Desinstale a antiga e instale a nova! Você pode baixar o APK [aqui](${ARTIFACT_URL})."
           curl -s -X POST https://api.telegram.org/bot${{ secrets.TELEGRAM_BOT_TOKEN }}/sendMessage \
           -d chat_id=${{ secrets.TELEGRAM_CHAT_ID }} \
