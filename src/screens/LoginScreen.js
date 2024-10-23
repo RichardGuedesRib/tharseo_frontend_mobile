@@ -29,6 +29,7 @@ export default function LoginScreen() {
     });
   }, []);
 
+  //Function to make login with credencials
   const handleLogin = async () => {
     const urlRequest = `${serverConfig.addressServerTharseo}/authenticate/auth`;
     try {
@@ -49,6 +50,7 @@ export default function LoginScreen() {
     }
   };
 
+  //Function to make login with google auth
   const handleGoogleLogin = async () => {
     try {
       await GoogleSignin.hasPlayServices();
@@ -72,6 +74,11 @@ export default function LoginScreen() {
       }
     }
   };
+
+  //Function to make login with face recognition
+  const handleFaceRecognition = () => {
+    navigation.navigate('FaceRecognition');
+  }
 
   const setUser = (data) => {
     const { user, accessToken, expiresIn } = data.data;
@@ -117,7 +124,7 @@ export default function LoginScreen() {
         <Text style={styles.googleButtonText}>Login com Google</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.facialButton}>
+      <TouchableOpacity onPress={handleFaceRecognition} style={styles.facialButton}>
         <Icon name="camera" size={20} color="#fff" style={styles.icon} />
         <Text style={styles.facialText}>Login com Reconhecimento Facial</Text>
       </TouchableOpacity>

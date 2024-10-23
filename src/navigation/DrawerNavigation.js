@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text, View } from 'react-native'; // Importe o componente Text
+import { Text, View } from 'react-native'; 
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -10,6 +10,7 @@ import TradesScreen from '../screens/TradesScreen';
 import HistoricScreen from '../screens/HistoricScreen';
 import OpenTradesScreen from '../screens/OpenTradesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
+import FaceRecognitionScreen from '../screens/FaceRecognitionScreen';
 
 import { useAuthStore } from '../stores/useAuthStore';
 import BootSplash from 'react-native-bootsplash';
@@ -102,6 +103,7 @@ function AppNavigator() {
         ) : (
           <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
         )}
+        <Stack.Screen name="FaceRecognition" component={FaceRecognitionScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );
