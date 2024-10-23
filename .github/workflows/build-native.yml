@@ -14,7 +14,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      # Step 2: Set up JDK # Step 2: Notify that the deploy has started
+      # Step 2: Notify that the deploy has started
       - name: Notify that deploy has started
         run: |
           MESSAGE="🚀  Deploy MOBILE na branch *develop-native* foi iniciado! A previsão para conclusão é de 12 minutos."
@@ -78,18 +78,7 @@ jobs:
           source: app-release.apk  
           target: /home/tharseo/apk/ 
 
-      # Step 11: Check if download_server.py exists and upload if not
-      - name: Check and upload download server script
-        uses: appleboy/scp-action@master
-        with:
-          host: ${{ secrets.THARSEO_BACKEND_HOST }}
-          username: ${{ secrets.THARSEO_BACKEND_HOST_USER }}
-          password: ${{ secrets.THARSEO_BACKEND_PASS }}
-          port: 22
-          source: download_server.py
-          target: /home/tharseo/apk/
-
-      # Step 12: Start Simple HTTP Server on Azure VM
+      # Step 11: Start Simple HTTP Server on Azure VM
       - name: Start Simple HTTP Server on Azure VM
         uses: appleboy/ssh-action@master
         with:
@@ -98,42 +87,24 @@ jobs:
           password: ${{ secrets.THARSEO_BACKEND_PASS }}
           port: 22
           script: |
-            # Verificar se o servidor está rodando na porta 8500
+            # Verifica se o servidor já está rodando na porta 8500 e para, se necessário
             if lsof -i :8500; then
-              echo "Servidor já está rodando na porta 8500. Nenhuma ação necessária."
-            else
-              echo "Servidor não está rodando. Tentando iniciar o servidor."
-              # Parar quaisquer instâncias anteriores
-              fuser -k 8500/tcp || true
-              
-              # Substituir o script e iniciar o servidor
-              if [ -f /home/tharseo/apk/download_server.py ]; then
-                echo "Substituindo o script download_server.py existente."
-              else
-                echo "O script download_server.py não existe no servidor. Copiando agora..."
-                cp ~/apk/download_server.py /home/tharseo/apk/
-              fi
-              
-              # Iniciar o servidor HTTP
-              chmod +x /home/tharseo/apk/download_server.py
-              nohup python3 /home/tharseo/apk/download_server.py > /home/tharseo/apk/server.log 2>&1 &
-              
-              # Verifique o status do servidor
-              sleep 2
-              if lsof -i :8500; then
-                echo "Servidor HTTP iniciado com sucesso na porta 8500."
-              else
-                echo "Falha ao iniciar o servidor HTTP na porta 8500."
-              fi
+              echo "Parando o servidor HTTP antigo."
+              fuser -k 8500/tcp
             fi
 
+            # Inicia um novo servidor HTTP na porta 8500
+            echo "Iniciando novo servidor HTTP."
+            cd /home/tharseo/apk
+            nohup python3 -m http.server 8500 > /home/tharseo/apk/server.log 2>&1 &
+            echo "Servidor HTTP iniciado com sucesso na porta 8500."
 
-      # Step 13: List download link
+      # Step 12: List download link
       - name: List download link
         run: |
           echo "O APK está disponível para download em: http://52.168.150.124:8500/app-release.apk" 
           
-      # Step 14: Notify on successful build with link to artifact
+      # Step 13: Notify on success with link to APK
       - name: Notify on success with link to APK
         if: success()
         run: |
@@ -144,7 +115,7 @@ jobs:
           -d text="${MESSAGE}" \
           -d parse_mode="Markdown"
 
-      # Step 15: Notify on failure
+      # Step 14: Notify on failure
       - name: Notify on failure
         if: failure()
         run: |
