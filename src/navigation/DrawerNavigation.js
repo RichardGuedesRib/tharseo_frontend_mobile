@@ -1,7 +1,8 @@
 import React, { useEffect } from 'react';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack'; // Importa o StackNavigator
+import { createStackNavigator } from '@react-navigation/stack';
+import { Text, View } from 'react-native'; // Importe o componente Text
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -28,35 +29,33 @@ function CustomDrawerContent(props) {
   };
 
   return (
-    <DrawerContentScrollView {...props}>
+    <DrawerContentScrollView {...props} style={{ backgroundColor: '#000' }}>
       <DrawerItem
-        label="Dashboard"
+        label={() => <Text style={{ color: '#fff' }}>Dashboard</Text>} 
         onPress={() => props.navigation.navigate('Home')}
       />
       <DrawerItem
-        label="Trades"
+        label={() => <Text style={{ color: '#fff' }}>Trades</Text>} 
         onPress={() => props.navigation.navigate('Trades')}
       />
       <DrawerItem
-        label="Em Andamento"
+        label={() => <Text style={{ color: '#fff' }}>Em Andamento</Text>} 
         onPress={() => props.navigation.navigate('OpenTrades')}
       />
       <DrawerItem
-        label="Histórico"
+        label={() => <Text style={{ color: '#fff' }}>Histórico</Text>} 
         onPress={() => props.navigation.navigate('Historic')}
       />
       <DrawerItem
-        label="Perfil"
+        label={() => <Text style={{ color: '#fff' }}>Perfil</Text>} 
         onPress={() => props.navigation.navigate('Profile')}
       />
-         <DrawerItem
-        label="Configurações"
-        onPress={() => props.navigation.navigate('Settings')}
-      />     
-      
-
       <DrawerItem
-        label="Logout"
+        label={() => <Text style={{ color: '#fff' }}>Configurações</Text>}
+        onPress={() => props.navigation.navigate('Settings')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Logout</Text>} 
         onPress={handleLogout}
       />
     </DrawerContentScrollView>
@@ -68,6 +67,15 @@ function DrawerNavigation() {
     <Drawer.Navigator
       initialRouteName="Home"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: '#000', 
+        },
+        headerStyle: {
+          backgroundColor: '#000', 
+        },
+        headerTintColor: '#fff',
+      }}
     >
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="Trades" component={TradesScreen} />
