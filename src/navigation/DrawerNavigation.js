@@ -12,6 +12,8 @@ import OpenTradesScreen from '../screens/OpenTradesScreen';
 import SettingsScreen from '../screens/SettingsScreen';
 import FaceRecognitionScreen from '../screens/FaceRecognitionScreen';
 import ErrorFaceRecognition from '../screens/ErrorFaceRecognition';
+import LocationAuthScreen from '../screens/LocationAuthScreen';
+import WifiSecureScreen from '../screens/WifiSecureScreen';
 
 import { useAuthStore } from '../stores/useAuthStore';
 import BootSplash from 'react-native-bootsplash';
@@ -106,6 +108,8 @@ function AppNavigator() {
         )}
         <Stack.Screen name="FaceRecognition" component={FaceRecognitionScreen} options={{ headerShown: false }} />
         <Stack.Screen name="ErrorFaceRecognition" component={ErrorFaceRecognition} />
+        <Stack.Screen name="LocationAuth" component={LocationAuthScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="WifiSecure" component={WifiSecureScreen} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

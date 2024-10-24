@@ -1,17 +1,21 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 
 export default function SettingsScreen() {
-  // Estado para controlar os toggles
   const [isNotificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isPrivacyEnabled, setPrivacyEnabled] = useState(false);
   const [isSafePointsEnabled, setSafePointsEnabled] = useState(false);
+  const navigation = useNavigation();
+
+  const handleWifiSecure = () => {
+    navigation.navigate('WifiSecure');
+  }
 
   return (
     <View style={styles.container}>
       <Text style={styles.title}>CONFIGURAÇÕES</Text>
       
-      {/* Card de Preferências de Notificação */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Preferências de notificação</Text>
@@ -47,7 +51,7 @@ export default function SettingsScreen() {
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Pontos seguros</Text>
-          <TouchableOpacity style={styles.addButton}>
+          <TouchableOpacity style={styles.addButton} onPress={handleWifiSecure}>
             <Text style={styles.addButtonText}>Adicionar +</Text>
           </TouchableOpacity>
         </View>

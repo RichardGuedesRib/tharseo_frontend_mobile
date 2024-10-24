@@ -80,6 +80,10 @@ export default function LoginScreen() {
     navigation.navigate('FaceRecognition');
   }
 
+  const handleLocation = () => {
+    navigation.navigate('LocationAuth');
+  }
+
   const setUser = (data) => {
     const { user, accessToken, expiresIn } = data.data;
     const { id, name, lastname, wallet, grids, transactions } = user;
@@ -128,6 +132,10 @@ export default function LoginScreen() {
         <Icon name="camera" size={20} color="#fff" style={styles.icon} />
         <Text style={styles.facialText}>Login com Reconhecimento Facial</Text>
       </TouchableOpacity>
+
+      <Text style={styles.facialText} onPress={handleLocation}>Simular Ponto não seguro</Text>
+
+      
     </View>
   );
 }

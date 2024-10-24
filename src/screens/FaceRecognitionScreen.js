@@ -1,15 +1,26 @@
-import React from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, Image} from 'react-native';
+import React, {useState} from 'react';
+import {View, Text, TouchableOpacity, StyleSheet, Image, ToastAndroid} from 'react-native';
 
 const FaceRecognitionScreen = ({navigation}) => {
+  const [isAuthenticating, setIsAuthenticating] = useState(false);
+
   const handleContinue = () => {
-    navigation.navigate('Login');
+    // Oculta os botões e exibe o toast de sucesso
+    setIsAuthenticating(true);
+    ToastAndroid.show('Autenticação bem sucedida', ToastAndroid.SHORT);
+
+    // Aguarda 3 segundos e redireciona para a tela de login
+    setTimeout(() => {
+      navigation.navigate('Login');
+    }, 3000);
   };
 
   return (
     <View style={styles.container}>
       <Text style={styles.label}>
-        Posicione seu rosto no círculo e clique em continuar
+        {isAuthenticating
+          ? 'Você será redirecionado ao app...'
+          : 'Posicione seu rosto no círculo e clique em continuar'}
       </Text>
       <View style={styles.ellipse}>
         <Image
@@ -18,14 +29,19 @@ const FaceRecognitionScreen = ({navigation}) => {
           resizeMode="cover"
         />
       </View>
-      <TouchableOpacity style={styles.button} onPress={handleContinue}>
-        <Text style={styles.buttonText}>Continuar</Text>
-      </TouchableOpacity>
-      <TouchableOpacity
-        style={styles.button}
-        onPress={() => navigation.navigate('ErrorFaceRecognition')}>
-        <Text style={styles.buttonText}>Simular Erro</Text>
-      </TouchableOpacity>
+
+      {!isAuthenticating && (
+        <>
+          <TouchableOpacity style={styles.button} onPress={handleContinue}>
+            <Text style={styles.buttonText}>Continuar</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={() => navigation.navigate('ErrorFaceRecognition')}>
+            <Text style={styles.buttonText}>Simular Erro</Text>
+          </TouchableOpacity>
+        </>
+      )}
     </View>
   );
 };
@@ -80,3 +96,4 @@ const styles = StyleSheet.create({
 });
 
 export default FaceRecognitionScreen;
+
