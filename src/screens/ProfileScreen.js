@@ -1,16 +1,70 @@
-import React from 'react';
-import { View, Text, Button, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useState } from 'react';
+import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, Alert } from 'react-native';
 import Header from '../components/Header';
+import { launchImageLibrary } from 'react-native-image-picker';
 
 export default function ProfileScreen({ navigation }) {
+  const [modalVisible, setModalVisible] = useState(false);
+  const [avatar, setAvatar] = useState('https://via.placeholder.com/100');
+  const [imageUri, setImageUri] = useState(null);
+  const openImagePicker = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+    };
+    launchImageLibrary(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled image picker');
+      } else if (response.error) {
+        console.log('ImagePicker Error: ', response.error);
+      } else {
+        const source = response.assets[0];
+        setAvatar(source.uri);
+        setImageUri(source.uri);
+        setModalVisible(false);
+      }
+    });
+  };
+
+  const uploadImage = async () => {
+    if (!imageUri) {
+      Alert.alert("Erro", "Selecione uma imagem antes de fazer o upload.");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append('avatar', {
+      uri: imageUri,
+      name: 'avatar.jpg',
+      type: 'image/jpeg',
+    });
+
+    try {
+      const response = await fetch('BASE URI', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+        body: formData,
+      });
+
+      const result = await response.json();
+      if (response.ok) {
+        Alert.alert("Sucesso", "Imagem enviada com sucesso!");
+      } else {
+        Alert.alert("Erro", result.message || "Falha ao enviar imagem.");
+      }
+    } catch (error) {
+      console.error("Upload error: ", error);
+      Alert.alert("Erro", "Erro ao enviar imagem.");
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Header />
       <View style={styles.avatarContainer}>
-        <Image 
-          source={{ uri: 'https://via.placeholder.com/100' }} 
-          style={styles.avatar}
-        />
+        <Image source={{ uri: avatar }} style={styles.avatar} />
         <Text style={styles.username}>Nome do Usuário</Text>
       </View>
 
@@ -26,30 +80,43 @@ export default function ProfileScreen({ navigation }) {
         <View style={styles.buttonsContainer}>
           <TouchableOpacity 
             style={styles.button} 
-            // onPress={() => navigation.navigate('ChangePasswordScreen')}
+            onPress={() => navigation.navigate('ChangePasswordScreen')}
           >
             <Text style={styles.buttonText}>Alterar Senha</Text>
           </TouchableOpacity>
           <TouchableOpacity 
             style={styles.button} 
-            // onPress={() => navigation.navigate('ChangeAvatarScreen')}
+            onPress={() => setModalVisible(true)}
           >
             <Text style={styles.buttonText}>Alterar Avatar</Text>
           </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.verificationCard}>
-        <Text style={styles.verificationTitle}>Obtenha sua identidade verificada para comprar e fazer trades no Tharseo</Text>
-        <Text style={styles.verificationText}>Verificado</Text>
-        <Text style={styles.verificationText}>Limite fiduciário de 10k USD mensal</Text>
-        <Text style={styles.verificationText}>Obrigatório:</Text>
-        <Text style={styles.verificationText}>- Informações Pessoais</Text>
-        <Text style={styles.verificationText}>- Reconhecimento facial</Text>
-        <TouchableOpacity style={styles.verifyButton}>
-          <Text style={styles.verifyButtonText}>Habilitar Verificação</Text>
+      {imageUri && (
+        <TouchableOpacity style={styles.uploadButton} onPress={uploadImage}>
+          <Text style={styles.uploadButtonText}>Fazer Upload de Avatar</Text>
         </TouchableOpacity>
-      </View>
+      )}
+
+      <Modal
+        transparent={true}
+        visible={modalVisible}
+        animationType="slide"
+        onRequestClose={() => setModalVisible(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <Text style={styles.modalText}>Permite que o aplicativo THARSEO acesse o armazenamento interno?</Text>
+            <TouchableOpacity style={styles.allowButton} onPress={openImagePicker}>
+              <Text style={styles.allowButtonText}>Permitir</Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={styles.denyButton} onPress={() => setModalVisible(false)}>
+              <Text style={styles.denyButtonText}>Negar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -132,5 +199,70 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontWeight: 'bold',
   },
-});
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0, 0, 0, 0.7)',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  modalContainer: {
+    width: '80%',
+    backgroundColor: '#1a1a1a',
+    padding: 20,
+    borderRadius: 10,
+    alignItems: 'center',
+  },
+  modalText: {
+    color: '#fff',
+    fontSize: 16,
+    marginBottom: 20,
+    textAlign: 'center',
+  },
+  allowButton: {
+    backgroundColor: '#007BFF',
+    paddingVertical: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+    marginBottom: 10,
+  },
+  allowButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  denyButton: {
+    backgroundColor: '#444',
+    paddingVertical: 10,
+    borderRadius: 5,
+    width: '100%',
+    alignItems: 'center',
+  },
+  denyButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  uploadButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  uploadButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
+  uploadButton: {
+    backgroundColor: '#4CAF50',
+    paddingVertical: 10,
+    borderRadius: 5,
+    alignItems: 'center',
+    marginTop: 20,
+  },
+  uploadButtonText: {
+    color: '#fff',
+    fontWeight: 'bold',
+  },
 
+
+});

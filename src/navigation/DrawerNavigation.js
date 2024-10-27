@@ -14,6 +14,9 @@ import FaceRecognitionScreen from '../screens/FaceRecognitionScreen';
 import ErrorFaceRecognition from '../screens/ErrorFaceRecognition';
 import LocationAuthScreen from '../screens/LocationAuthScreen';
 import WifiSecureScreen from '../screens/WifiSecureScreen';
+import RegisterScreen1 from '../screens/RegisterScreen1';
+import RegisterScreen2 from '../screens/RegisterScreen2';
+import RegisterScreen3 from '../screens/RegisterScreen3';
 
 import { useAuthStore } from '../stores/useAuthStore';
 import BootSplash from 'react-native-bootsplash';
@@ -110,6 +113,9 @@ function AppNavigator() {
         <Stack.Screen name="ErrorFaceRecognition" component={ErrorFaceRecognition} />
         <Stack.Screen name="LocationAuth" component={LocationAuthScreen} options={{ headerShown: false }} />
         <Stack.Screen name="WifiSecure" component={WifiSecureScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="Register" component={RegisterScreen1} options={{ headerShown: false }} />
+        <Stack.Screen name="RegisterTwo" component={RegisterScreen2} options={{ headerShown: false }} />
+        <Stack.Screen name="RegisterThree" component={RegisterScreen3} options={{ headerShown: false }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

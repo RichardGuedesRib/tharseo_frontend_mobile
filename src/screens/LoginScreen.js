@@ -1,29 +1,38 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, Image, StyleSheet,
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  Image,
+  StyleSheet,
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
-import { GoogleSignin, statusCodes } from '@react-native-google-signin/google-signin';
+import {
+  GoogleSignin,
+  statusCodes,
+} from '@react-native-google-signin/google-signin';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import serverConfig from '../services/ServerConfig';
-import { useAuthStore } from '../stores/useAuthStore';
-import { useStrategyGridStore } from '../stores/useStrategyGridStore';
-import { useTransactionStore } from '../stores/useTransactionStore';
-import { useUserWalletStore } from '../stores/useUserWalletStore';
-import { useNavigation } from '@react-navigation/native';
+import {useAuthStore} from '../stores/useAuthStore';
+import {useStrategyGridStore} from '../stores/useStrategyGridStore';
+import {useTransactionStore} from '../stores/useTransactionStore';
+import {useUserWalletStore} from '../stores/useUserWalletStore';
+import {useNavigation} from '@react-navigation/native';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const { setAuth } = useAuthStore();
-  const { setGrids } = useStrategyGridStore();
-  const { setTransactions } = useTransactionStore();
-  const { setAssets } = useUserWalletStore();
+  const {setAuth} = useAuthStore();
+  const {setGrids} = useStrategyGridStore();
+  const {setTransactions} = useTransactionStore();
+  const {setAssets} = useUserWalletStore();
   const navigation = useNavigation();
 
   useEffect(() => {
     GoogleSignin.configure({
-      webClientId: '994939095037-51i8qgua6rv3p3nn8biuoe8fe6rqdc4c.apps.googleusercontent.com',
+      webClientId:
+        '994939095037-51i8qgua6rv3p3nn8biuoe8fe6rqdc4c.apps.googleusercontent.com',
       offlineAccess: true,
       forceCodeForRefreshToken: true,
     });
@@ -34,12 +43,12 @@ export default function LoginScreen() {
     const urlRequest = `${serverConfig.addressServerTharseo}/authenticate/auth`;
     try {
       const response = await fetch(urlRequest, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ login: email, password: password }),
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({login: email, password: password}),
       });
       if (!response.ok) {
-        alert("Usuário ou Senha Inválidos");
+        alert('Usuário ou Senha Inválidos');
       } else {
         const data = await response.json();
         setUser(data);
@@ -55,12 +64,17 @@ export default function LoginScreen() {
     try {
       await GoogleSignin.hasPlayServices();
       const userInfo = await GoogleSignin.signIn();
-      const googleCredential = auth.GoogleAuthProvider.credential(userInfo.data.idToken);
-      const response = await fetch(`${serverConfig.addressServerTharseo}/googleauth/auth2`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(userInfo.data.idToken),
-      });
+      const googleCredential = auth.GoogleAuthProvider.credential(
+        userInfo.data.idToken,
+      );
+      const response = await fetch(
+        `${serverConfig.addressServerTharseo}/googleauth/auth2`,
+        {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify(userInfo.data.idToken),
+        },
+      );
       const data = await response.json();
       if (response.ok) {
         setUser(data);
@@ -69,7 +83,10 @@ export default function LoginScreen() {
         console.error('Login Failed:', data.message);
       }
     } catch (error) {
-      if (error.code !== statusCodes.SIGN_IN_CANCELLED && error.code !== statusCodes.IN_PROGRESS) {
+      if (
+        error.code !== statusCodes.SIGN_IN_CANCELLED &&
+        error.code !== statusCodes.IN_PROGRESS
+      ) {
         console.error(error);
       }
     }
@@ -78,17 +95,21 @@ export default function LoginScreen() {
   //Function to make login with face recognition
   const handleFaceRecognition = () => {
     navigation.navigate('FaceRecognition');
-  }
+  };
 
   const handleLocation = () => {
     navigation.navigate('LocationAuth');
-  }
+  };
 
-  const setUser = (data) => {
-    const { user, accessToken, expiresIn } = data.data;
-    const { id, name, lastname, wallet, grids, transactions } = user;
+  const setUser = data => {
+    const {user, accessToken, expiresIn} = data.data;
+    const {id, name, lastname, wallet, grids, transactions} = user;
     setAuth({
-      id, name, lastname, token: accessToken, expiration: new Date().getTime() + expiresIn * 1000,
+      id,
+      name,
+      lastname,
+      token: accessToken,
+      expiration: new Date().getTime() + expiresIn * 1000,
     });
     setGrids(grids);
     setTransactions(transactions);
@@ -100,7 +121,7 @@ export default function LoginScreen() {
       <Image
         source={require('../Assets/img/launch_splash.png')}
         style={styles.logo}
-        resizeMode="contain" // Para ajustar o redimensionamento da imagem
+        resizeMode="contain" 
       />
 
       <TextInput
@@ -128,14 +149,20 @@ export default function LoginScreen() {
         <Text style={styles.googleButtonText}>Login com Google</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity onPress={handleFaceRecognition} style={styles.facialButton}>
+      <TouchableOpacity
+        onPress={handleFaceRecognition}
+        style={styles.facialButton}>
         <Icon name="camera" size={20} color="#fff" style={styles.icon} />
         <Text style={styles.facialText}>Login com Reconhecimento Facial</Text>
       </TouchableOpacity>
 
-      <Text style={styles.facialText} onPress={handleLocation}>Simular Ponto não seguro</Text>
+      <Text style={styles.facialText} onPress={handleLocation}>
+        Simular Ponto não seguro
+      </Text>
 
-      
+      <TouchableOpacity onPress={() => navigation.navigate('Register')}>
+        <Text style={styles.createAccountText}>Criar Conta</Text>
+      </TouchableOpacity>
     </View>
   );
 }
@@ -148,7 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   logo: {
-    width: '70%', 
+    width: '70%',
     height: 150,
     marginBottom: 30,
   },
@@ -175,7 +202,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   googleButton: {
-    flexDirection: 'row', 
+    flexDirection: 'row',
     width: '80%',
     height: 50,
     backgroundColor: '#4285F4',
@@ -190,7 +217,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   facialButton: {
-    position: 'absolute', 
+    position: 'absolute',
     bottom: 40,
     width: '80%',
     height: 50,
@@ -198,14 +225,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     alignItems: 'center',
     justifyContent: 'center',
-    flexDirection: 'row', 
+    flexDirection: 'row',
   },
   facialText: {
     color: '#fff',
     fontSize: 16,
-    marginLeft: 10, 
+    marginLeft: 10,
   },
   icon: {
-    marginRight: 10, 
+    marginRight: 10,
+  },
+  createAccountText: {
+    color: '#fff',
+    fontSize: 16,
+    textDecorationLine: 'underline',
+    marginTop: 20,
   },
 });

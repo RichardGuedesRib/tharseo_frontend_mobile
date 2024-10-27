@@ -53,13 +53,13 @@ const styles = StyleSheet.create({
   },
   content: {
     width: '90%',
-    height: '80%', // Aumenta a altura da div
-    backgroundColor: 'rgba(59, 59, 59, 0.8)', // Grafite com transparência
+    height: '80%', 
+    backgroundColor: 'rgba(59, 59, 59, 0.8)', 
     borderRadius: 10,
     padding: 20,
   },
   backText: {
-    color: '#DCDCDC', // Cor branco gelo
+    color: '#DCDCDC', 
     fontSize: 16,
     marginBottom: 20,
     textDecorationLine: 'underline',
@@ -71,14 +71,14 @@ const styles = StyleSheet.create({
     marginBottom: 10,
   },
   description: {
-    color: '#DCDCDC', // Cor branco gelo
+    color: '#DCDCDC', 
     fontSize: 14,
     marginBottom: 20,
     textAlign: 'left',
   },
   divider: {
     height: 1,
-    backgroundColor: '#DCDCDC', // Cor branco gelo
+    backgroundColor: '#DCDCDC',
     marginVertical: 20,
   },
   inputContainer: {
@@ -86,7 +86,7 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#DCDCDC', // Cor branco gelo
+    borderColor: '#DCDCDC', 
     borderRadius: 5,
     padding: 10,
     color: '#fff',
