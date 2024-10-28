@@ -19,7 +19,6 @@ const Header = () => {
       />
       </TouchableOpacity>
 
-      <Text style={styles.name}>{name}</Text>
       <Image
         source={require('../Assets/img/perfil.jpg')}
         style={styles.avatar}

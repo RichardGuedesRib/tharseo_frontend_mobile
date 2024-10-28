@@ -19,6 +19,7 @@ import {useStrategyGridStore} from '../stores/useStrategyGridStore';
 import {useTransactionStore} from '../stores/useTransactionStore';
 import {useUserWalletStore} from '../stores/useUserWalletStore';
 import {useNavigation} from '@react-navigation/native';
+import {getAllAssetsServer} from '../services/AssetsService';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -52,6 +53,10 @@ export default function LoginScreen() {
       } else {
         const data = await response.json();
         setUser(data);
+
+        //Loading data from server to populate stores
+        await getAllAssetsServer();
+
         navigation.navigate('Home');
       }
     } catch (error) {
@@ -78,6 +83,7 @@ export default function LoginScreen() {
       const data = await response.json();
       if (response.ok) {
         setUser(data);
+
         navigation.navigate('Home');
       } else {
         console.error('Login Failed:', data.message);
