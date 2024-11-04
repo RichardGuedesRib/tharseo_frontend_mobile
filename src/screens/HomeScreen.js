@@ -5,6 +5,7 @@ import { useAuthStore } from '../stores/useAuthStore';
 import { useAssetStore } from '../stores/useAssetStore';
 import { getAllAssetsServer } from '../services/AssetsService';
 import Chart from '../components/Chart';
+import AssetsList from '../components/AssetsList';
 
 
 export default function HomeScreen({ navigation }) {
@@ -35,11 +36,10 @@ export default function HomeScreen({ navigation }) {
     <View style={styles.container}>
       <Header />
       <Text style={styles.title}>Bem vindo, {name}</Text>
-      <Text>Home Screen</Text>
-      <Chart />
+    
       <View style={styles.content}>
-        <Text>Home Screen</Text>
-        <Button title="Go to Profile" onPress={() => navigation.navigate('Profile')} />
+      <Chart />
+       <AssetsList/>
       </View>
     </View>
   );
