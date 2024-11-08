@@ -1,8 +1,11 @@
 import React, { useEffect } from 'react';
+import { Alert } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
-import { Text, View } from 'react-native'; 
+import ReactNativeBiometrics from 'react-native-biometrics';
+import BootSplash from 'react-native-bootsplash';
+
 import HomeScreen from '../screens/HomeScreen';
 import ProfileScreen from '../screens/ProfileScreen';
 import LoginScreen from '../screens/LoginScreen';
@@ -19,10 +22,10 @@ import RegisterScreen2 from '../screens/RegisterScreen2';
 import RegisterScreen3 from '../screens/RegisterScreen3';
 
 import { useAuthStore } from '../stores/useAuthStore';
-import BootSplash from 'react-native-bootsplash';
 
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
+const rnBiometrics = new ReactNativeBiometrics();
 
 function CustomDrawerContent(props) {
   const { clearAuth } = useAuthStore();
@@ -37,34 +40,13 @@ function CustomDrawerContent(props) {
 
   return (
     <DrawerContentScrollView {...props} style={{ backgroundColor: '#000' }}>
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Dashboard</Text>} 
-        onPress={() => props.navigation.navigate('Home')}
-      />
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Trades</Text>} 
-        onPress={() => props.navigation.navigate('Trades')}
-      />
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Em Andamento</Text>} 
-        onPress={() => props.navigation.navigate('OpenTrades')}
-      />
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Histórico</Text>} 
-        onPress={() => props.navigation.navigate('Historic')}
-      />
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Perfil</Text>} 
-        onPress={() => props.navigation.navigate('Profile')}
-      />
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Configurações</Text>}
-        onPress={() => props.navigation.navigate('Settings')}
-      />
-      <DrawerItem
-        label={() => <Text style={{ color: '#fff' }}>Logout</Text>} 
-        onPress={handleLogout}
-      />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Dashboard</Text>} onPress={() => props.navigation.navigate('Home')} />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Trades</Text>} onPress={() => props.navigation.navigate('Trades')} />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Em Andamento</Text>} onPress={() => props.navigation.navigate('OpenTrades')} />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Histórico</Text>} onPress={() => props.navigation.navigate('Historic')} />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Perfil</Text>} onPress={() => props.navigation.navigate('Profile')} />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Configurações</Text>} onPress={() => props.navigation.navigate('Settings')} />
+      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Logout</Text>} onPress={handleLogout} />
     </DrawerContentScrollView>
   );
 }
@@ -75,12 +57,8 @@ function DrawerNavigation() {
       initialRouteName="Home"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
       screenOptions={{
-        drawerStyle: {
-          backgroundColor: '#000', 
-        },
-        headerStyle: {
-          backgroundColor: '#000', 
-        },
+        drawerStyle: { backgroundColor: '#000' },
+        headerStyle: { backgroundColor: '#000' },
         headerTintColor: '#fff',
       }}
     >
@@ -97,25 +75,52 @@ function DrawerNavigation() {
 function AppNavigator() {
   const { token } = useAuthStore();
 
+  const authenticateUser = async () => {
+    try {
+      const { available, biometryType } = await rnBiometrics.isSensorAvailable();
+
+      if (!available) {
+        Alert.alert('Erro', 'Biometria não disponível ou não configurada.');
+        return;
+      }
+
+      const promptMessage = biometryType === 'FaceID' ? 'Use Face ID' : 'Use impressão digital';
+      const { success } = await rnBiometrics.simplePrompt({ promptMessage });
+
+      if (!success) {
+        Alert.alert('Autenticação falhou', 'Tente novamente.');
+        authenticateUser(); // Re-tenta a autenticação se falhar
+      }
+    } catch (error) {
+      console.error('Erro ao autenticar:', error);
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar autenticar.');
+    }
+  };
+
   useEffect(() => {
-    BootSplash.hide({ duration: 500 }); 
+    const init = async () => {
+      await authenticateUser();
+      await BootSplash.hide({ duration: 500 });
+    };
+
+    init();
   }, []);
 
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator screenOptions={{ headerShown: false }}>
         {token ? (
-          <Stack.Screen name="Main" component={DrawerNavigation} options={{ headerShown: false }} />
+          <Stack.Screen name="Main" component={DrawerNavigation} />
         ) : (
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="Login" component={LoginScreen} />
         )}
-        <Stack.Screen name="FaceRecognition" component={FaceRecognitionScreen} options={{ headerShown: false }} />
+        <Stack.Screen name="FaceRecognition" component={FaceRecognitionScreen} />
         <Stack.Screen name="ErrorFaceRecognition" component={ErrorFaceRecognition} />
-        <Stack.Screen name="LocationAuth" component={LocationAuthScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="WifiSecure" component={WifiSecureScreen} options={{ headerShown: false }} />
-        <Stack.Screen name="Register" component={RegisterScreen1} options={{ headerShown: false }} />
-        <Stack.Screen name="RegisterTwo" component={RegisterScreen2} options={{ headerShown: false }} />
-        <Stack.Screen name="RegisterThree" component={RegisterScreen3} options={{ headerShown: false }} />
+        <Stack.Screen name="LocationAuth" component={LocationAuthScreen} />
+        <Stack.Screen name="WifiSecure" component={WifiSecureScreen} />
+        <Stack.Screen name="Register" component={RegisterScreen1} />
+        <Stack.Screen name="RegisterTwo" component={RegisterScreen2} />
+        <Stack.Screen name="RegisterThree" component={RegisterScreen3} />
       </Stack.Navigator>
     </NavigationContainer>
   );
