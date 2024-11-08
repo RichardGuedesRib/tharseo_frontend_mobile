@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { Alert } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { Alert, BackHandler } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -27,53 +27,38 @@ const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 const rnBiometrics = new ReactNativeBiometrics();
 
-function CustomDrawerContent(props) {
-  const { clearAuth } = useAuthStore();
-
-  const handleLogout = async () => {
-    try {
-      clearAuth();
-    } catch (error) {
-      console.error('Erro ao deslogar: ', error);
-    }
-  };
-
-  return (
-    <DrawerContentScrollView {...props} style={{ backgroundColor: '#000' }}>
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Dashboard</Text>} onPress={() => props.navigation.navigate('Home')} />
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Trades</Text>} onPress={() => props.navigation.navigate('Trades')} />
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Em Andamento</Text>} onPress={() => props.navigation.navigate('OpenTrades')} />
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Histórico</Text>} onPress={() => props.navigation.navigate('Historic')} />
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Perfil</Text>} onPress={() => props.navigation.navigate('Profile')} />
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Configurações</Text>} onPress={() => props.navigation.navigate('Settings')} />
-      <DrawerItem label={() => <Text style={{ color: '#fff' }}>Logout</Text>} onPress={handleLogout} />
-    </DrawerContentScrollView>
-  );
-}
-
 function DrawerNavigation() {
   return (
     <Drawer.Navigator
-      initialRouteName="Home"
+      screenOptions={{ headerShown: true }}
       drawerContent={(props) => <CustomDrawerContent {...props} />}
-      screenOptions={{
-        drawerStyle: { backgroundColor: '#000' },
-        headerStyle: { backgroundColor: '#000' },
-        headerTintColor: '#fff',
-      }}
     >
       <Drawer.Screen name="Home" component={HomeScreen} />
-      <Drawer.Screen name="Trades" component={TradesScreen} />
-      <Drawer.Screen name="OpenTrades" component={OpenTradesScreen} />
-      <Drawer.Screen name="Historic" component={HistoricScreen} />
-      <Drawer.Screen name="Settings" component={SettingsScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
+      <Drawer.Screen name="Trades" component={TradesScreen} />
+      <Drawer.Screen name="Historic" component={HistoricScreen} />
+      <Drawer.Screen name="OpenTrades" component={OpenTradesScreen} />
+      <Drawer.Screen name="Settings" component={SettingsScreen} />
     </Drawer.Navigator>
+  );
+}
+
+function CustomDrawerContent(props) {
+  return (
+    <DrawerContentScrollView {...props}>
+      <DrawerItem label="Home" onPress={() => props.navigation.navigate('Home')} />
+      <DrawerItem label="Profile" onPress={() => props.navigation.navigate('Profile')} />
+      <DrawerItem label="Trades" onPress={() => props.navigation.navigate('Trades')} />
+      <DrawerItem label="Historic" onPress={() => props.navigation.navigate('Historic')} />
+      <DrawerItem label="Open Trades" onPress={() => props.navigation.navigate('OpenTrades')} />
+      <DrawerItem label="Settings" onPress={() => props.navigation.navigate('Settings')} />
+    </DrawerContentScrollView>
   );
 }
 
 function AppNavigator() {
   const { token } = useAuthStore();
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   const authenticateUser = async () => {
     try {
@@ -81,30 +66,45 @@ function AppNavigator() {
 
       if (!available) {
         Alert.alert('Erro', 'Biometria não disponível ou não configurada.');
-        return;
+        return false;
       }
 
-      const promptMessage = biometryType === 'FaceID' ? 'Use Face ID' : 'Use impressão digital';
+      const promptMessage = biometryType === 'FaceID' ? 'Use o Face ID' : 'Use sua impressão digital';
       const { success } = await rnBiometrics.simplePrompt({ promptMessage });
 
-      if (!success) {
-        Alert.alert('Autenticação falhou', 'Tente novamente.');
-        authenticateUser(); // Re-tenta a autenticação se falhar
+      if (success) {
+        console.log('Autenticação biométrica bem-sucedida');
+        return true;
+      } else {
+        Alert.alert('Autenticação falhou', 'Fechando o aplicativo.');
+        BackHandler.exitApp();
+        return false;
       }
     } catch (error) {
       console.error('Erro ao autenticar:', error);
-      Alert.alert('Erro', 'Ocorreu um erro ao tentar autenticar.');
+      Alert.alert('Erro', 'Ocorreu um erro ao tentar autenticar. Fechando o aplicativo.');
+      BackHandler.exitApp();
+      return false;
     }
   };
 
   useEffect(() => {
     const init = async () => {
-      await authenticateUser();
-      await BootSplash.hide({ duration: 500 });
+      const authenticated = await authenticateUser();
+
+      if (authenticated) {
+        setIsAuthenticated(true);
+      }
+
+      BootSplash.hide({ duration: 500 });
     };
 
     init();
   }, []);
+
+  if (!isAuthenticated) {
+    return null;
+  }
 
   return (
     <NavigationContainer>
