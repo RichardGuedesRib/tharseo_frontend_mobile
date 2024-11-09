@@ -7,6 +7,7 @@ export default function ProfileScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [avatar, setAvatar] = useState('https://via.placeholder.com/100');
   const [imageUri, setImageUri] = useState(null);
+  const [base64Image, setBase64Image] = useState(null);
   const openImagePicker = () => {
     Alert.alert(
       'Selecionar Imagem',
@@ -33,6 +34,7 @@ export default function ProfileScreen({ navigation }) {
     const options = {
       mediaType: 'photo',
       quality: 1,
+      includeBase64: true,
     };
     launchImageLibrary(options, (response) => {
       if (response.didCancel) {
@@ -43,6 +45,7 @@ export default function ProfileScreen({ navigation }) {
         const source = response.assets[0];
         setAvatar(source.uri);
         setImageUri(source.uri);
+        setBase64Image(source.base64);
         setModalVisible(false);
       }
     });
@@ -53,6 +56,7 @@ export default function ProfileScreen({ navigation }) {
       mediaType: 'photo',
       quality: 1,
       cameraType: 'back',
+      includeBase64: true,
     };
     launchCamera(options, (response) => {
       if (response.didCancel) {
@@ -63,6 +67,7 @@ export default function ProfileScreen({ navigation }) {
         const source = response.assets[0];
         setAvatar(source.uri);
         setImageUri(source.uri);
+        setBase64Image(source.base64);
         setModalVisible(false);
       }
     });
