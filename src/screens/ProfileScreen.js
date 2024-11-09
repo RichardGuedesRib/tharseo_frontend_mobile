@@ -12,7 +12,6 @@ export default function ProfileScreen({ navigation }) {
   const [imageUri, setImageUri] = useState(null);
   const [base64Image, setBase64Image] = useState(null);
   const { id, name, lastname, phoneNumber, email, token, expiration, setAvatar } = useAuthStore();
-  
 
   
   const openImagePicker = () => {
