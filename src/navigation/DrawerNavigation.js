@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { Alert, BackHandler } from 'react-native';
+import { Alert, BackHandler, Text } from 'react-native';
 import { createDrawerNavigator, DrawerContentScrollView, DrawerItem } from '@react-navigation/drawer';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
@@ -27,11 +27,31 @@ const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 const rnBiometrics = new ReactNativeBiometrics();
 
+const handleLogout = async () => {
+  try {
+    clearAuth();
+  } catch (error) {
+    console.error('Erro ao deslogar: ', error);
+  }
+}
+
 function DrawerNavigation() {
+
+ ;
+
   return (
     <Drawer.Navigator
-      screenOptions={{ headerShown: true }}
+      initialRouteName="Home"
       drawerContent={(props) => <CustomDrawerContent {...props} />}
+      screenOptions={{
+        drawerStyle: {
+          backgroundColor: '#000', 
+        },
+        headerStyle: {
+          backgroundColor: '#000', 
+        },
+        headerTintColor: '#fff',
+      }}
     >
       <Drawer.Screen name="Home" component={HomeScreen} />
       <Drawer.Screen name="Profile" component={ProfileScreen} />
@@ -45,13 +65,35 @@ function DrawerNavigation() {
 
 function CustomDrawerContent(props) {
   return (
-    <DrawerContentScrollView {...props}>
-      <DrawerItem label="Home" onPress={() => props.navigation.navigate('Home')} />
-      <DrawerItem label="Profile" onPress={() => props.navigation.navigate('Profile')} />
-      <DrawerItem label="Trades" onPress={() => props.navigation.navigate('Trades')} />
-      <DrawerItem label="Historic" onPress={() => props.navigation.navigate('Historic')} />
-      <DrawerItem label="Open Trades" onPress={() => props.navigation.navigate('OpenTrades')} />
-      <DrawerItem label="Settings" onPress={() => props.navigation.navigate('Settings')} />
+    <DrawerContentScrollView {...props} style={{ backgroundColor: '#000' }}>
+       <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Dashboard</Text>} 
+        onPress={() => props.navigation.navigate('Home')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Trades</Text>} 
+        onPress={() => props.navigation.navigate('Trades')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Em Andamento</Text>} 
+        onPress={() => props.navigation.navigate('OpenTrades')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Histórico</Text>} 
+        onPress={() => props.navigation.navigate('Historic')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Perfil</Text>} 
+        onPress={() => props.navigation.navigate('Profile')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Configurações</Text>}
+        onPress={() => props.navigation.navigate('Settings')}
+      />
+      <DrawerItem
+        label={() => <Text style={{ color: '#fff' }}>Logout</Text>} 
+        onPress={handleLogout}
+      />
     </DrawerContentScrollView>
   );
 }
@@ -102,9 +144,9 @@ function AppNavigator() {
     init();
   }, []);
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  // if (!isAuthenticated) {
+  //   return null;
+  // }
 
   return (
     <NavigationContainer>
