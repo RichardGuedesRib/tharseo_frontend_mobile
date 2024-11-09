@@ -26,6 +26,7 @@ import { useAuthStore } from '../stores/useAuthStore';
 const Drawer = createDrawerNavigator();
 const Stack = createStackNavigator();
 const rnBiometrics = new ReactNativeBiometrics();
+const clearAuth = useAuthStore((state) => state.clearAuth);
 
 const handleLogout = async () => {
   try {

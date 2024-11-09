@@ -3,7 +3,7 @@ import {View, Image, TouchableOpacity, StyleSheet, Text} from 'react-native';
 import { useAuthStore } from '../stores/useAuthStore';
 
 const Header = () => {
-  const {name, lastname} = useAuthStore();
+  const { name, lastname, avatar } = useAuthStore();
   return (
     <View style={styles.container}>
       {/* Logo */}
@@ -19,10 +19,17 @@ const Header = () => {
       />
       </TouchableOpacity>
 
-      <Image
-        source={require('../Assets/img/perfil.jpg')}
-        style={styles.avatar}
-      />
+      {avatar ? (
+        <Image
+          source={{ uri: `data:image/jpeg;base64,${avatar}` }}
+          style={styles.avatar}
+        />
+      ) : (
+        <Image
+          source={require('../Assets/img/perfil.jpg')}
+          style={styles.avatar}
+        />
+      )}
     </View>
   );
 };

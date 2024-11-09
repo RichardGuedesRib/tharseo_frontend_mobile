@@ -4,13 +4,16 @@ import Header from '../components/Header';
 import { launchImageLibrary, launchCamera  } from 'react-native-image-picker';
 import { useAuthStore } from '../stores/useAuthStore';
 import serverConfig from '../services/ServerConfig';
+import {useNavigation} from '@react-navigation/native';
 
 export default function ProfileScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
-  const [avatar, setAvatar] = useState('https://via.placeholder.com/100');
+  const [newAvatar, setnewAvatar] = useState('https://via.placeholder.com/100');
   const [imageUri, setImageUri] = useState(null);
   const [base64Image, setBase64Image] = useState(null);
-  const { id, name, lastname, phoneNumber, email, token, expiration } = useAuthStore();
+  const { id, name, lastname, phoneNumber, email, token, expiration, setAvatar } = useAuthStore();
+  
+
   
   const openImagePicker = () => {
     Alert.alert(
@@ -48,7 +51,7 @@ export default function ProfileScreen({ navigation }) {
         console.log('ImagePicker Error: ', response.error);
       } else {
         const source = response.assets[0];
-        setAvatar(source.uri);
+        setnewAvatar(source.uri);
         setImageUri(source.uri);
         setBase64Image(source.base64);
         setModalVisible(false);
@@ -72,7 +75,7 @@ export default function ProfileScreen({ navigation }) {
       } else {
         const source = response.assets[0];
         if(source){
-          setAvatar(source.uri);
+          setnewAvatar(source.uri);
           setImageUri(source.uri);
           setBase64Image(source.base64);
           setModalVisible(false);
@@ -102,7 +105,9 @@ export default function ProfileScreen({ navigation }) {
       if (!response.ok) {
         Alert.alert('Erro ao atualizar mensagem!');
       } else {
+        setAvatar(base64Image);
         Alert.alert('Imagem de perfil atualizada com sucesso!');
+        navigation.navigate('Home');
       }
     } catch (error) {
       console.error(error);
@@ -114,7 +119,7 @@ export default function ProfileScreen({ navigation }) {
     <View style={styles.container}>
       <Header />
       <View style={styles.avatarContainer}>
-        <Image source={{ uri: avatar }} style={styles.avatar} />
+        <Image source={{ uri: newAvatar }} style={styles.avatar} />
         <Text style={styles.username}>Nome do Usuário</Text>
       </View>
 

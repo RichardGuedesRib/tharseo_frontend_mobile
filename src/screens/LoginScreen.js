@@ -109,13 +109,14 @@ export default function LoginScreen() {
 
   const setUser = data => {
     const {user, accessToken, expiresIn} = data.data;
-    const {id, name, lastname, phoneNumber, email, wallet, grids, transactions} = user;
+    const {id, name, lastname, phoneNumber, email, avatar, wallet, grids, transactions} = user;
     setAuth({
       id,
       name,
       lastname,
       phoneNumber,
       email,
+      avatar,
       token: accessToken,
       expiration: new Date().getTime() + expiresIn * 1000,
     });
