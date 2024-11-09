@@ -1,13 +1,35 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, Alert } from 'react-native';
 import Header from '../components/Header';
-import { launchImageLibrary } from 'react-native-image-picker';
+import { launchImageLibrary, launchCamera  } from 'react-native-image-picker';
 
 export default function ProfileScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [avatar, setAvatar] = useState('https://via.placeholder.com/100');
   const [imageUri, setImageUri] = useState(null);
   const openImagePicker = () => {
+    Alert.alert(
+      'Selecionar Imagem',
+      'Escolha uma opção:',
+      [
+        {
+          text: 'Galeria',
+          onPress: () => selectFromGallery(),
+        },
+        {
+          text: 'Câmera',
+          onPress: () => openCamera(),
+        },
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+      ],
+      { cancelable: true }
+    );
+  };
+  
+  const selectFromGallery = () => {
     const options = {
       mediaType: 'photo',
       quality: 1,
@@ -25,7 +47,26 @@ export default function ProfileScreen({ navigation }) {
       }
     });
   };
-
+  
+  const openCamera = () => {
+    const options = {
+      mediaType: 'photo',
+      quality: 1,
+      cameraType: 'back',
+    };
+    launchCamera(options, (response) => {
+      if (response.didCancel) {
+        console.log('User cancelled camera');
+      } else if (response.error) {
+        console.log('Camera Error: ', response.error);
+      } else {
+        const source = response.assets[0];
+        setAvatar(source.uri);
+        setImageUri(source.uri);
+        setModalVisible(false);
+      }
+    });
+  };
   const uploadImage = async () => {
     if (!imageUri) {
       Alert.alert("Erro", "Selecione uma imagem antes de fazer o upload.");
