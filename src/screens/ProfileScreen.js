@@ -2,12 +2,16 @@ import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Image, Modal, Alert } from 'react-native';
 import Header from '../components/Header';
 import { launchImageLibrary, launchCamera  } from 'react-native-image-picker';
+import { useAuthStore } from '../stores/useAuthStore';
+import serverConfig from '../services/ServerConfig';
 
 export default function ProfileScreen({ navigation }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [avatar, setAvatar] = useState('https://via.placeholder.com/100');
   const [imageUri, setImageUri] = useState(null);
   const [base64Image, setBase64Image] = useState(null);
+  const { id, name, lastname, phoneNumber, email, token, expiration } = useAuthStore();
+  
   const openImagePicker = () => {
     Alert.alert(
       'Selecionar Imagem',
@@ -32,6 +36,7 @@ export default function ProfileScreen({ navigation }) {
   
   const selectFromGallery = () => {
     const options = {
+      selectionLimit: 1,
       mediaType: 'photo',
       quality: 1,
       includeBase64: true,
@@ -53,6 +58,7 @@ export default function ProfileScreen({ navigation }) {
   
   const openCamera = () => {
     const options = {
+      saveToPhotos: false,
       mediaType: 'photo',
       quality: 1,
       cameraType: 'back',
@@ -65,45 +71,43 @@ export default function ProfileScreen({ navigation }) {
         console.log('Camera Error: ', response.error);
       } else {
         const source = response.assets[0];
-        setAvatar(source.uri);
-        setImageUri(source.uri);
-        setBase64Image(source.base64);
-        setModalVisible(false);
+        if(source){
+          setAvatar(source.uri);
+          setImageUri(source.uri);
+          setBase64Image(source.base64);
+          setModalVisible(false);
+        } else {
+          Alert.alert('Erro ao abrir camera');
+        }
+      
       }
     });
   };
+
   const uploadImage = async () => {
     if (!imageUri) {
       Alert.alert("Erro", "Selecione uma imagem antes de fazer o upload.");
       return;
     }
 
-    const formData = new FormData();
-    formData.append('avatar', {
-      uri: imageUri,
-      name: 'avatar.jpg',
-      type: 'image/jpeg',
-    });
-
+    const urlRequest = `${serverConfig.addressServerTharseo}/users/${id}`;
     try {
-      const response = await fetch('BASE URI', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'multipart/form-data',
+      const response = await fetch(urlRequest, {
+        method: 'PUT',
+        headers: {'Content-Type': 'application/json',
+                  'Authorization': `Bearer ${token}`
         },
-        body: formData,
+        body: JSON.stringify({avatar: base64Image}),
       });
-
-      const result = await response.json();
-      if (response.ok) {
-        Alert.alert("Sucesso", "Imagem enviada com sucesso!");
+      if (!response.ok) {
+        Alert.alert('Erro ao atualizar mensagem!');
       } else {
-        Alert.alert("Erro", result.message || "Falha ao enviar imagem.");
+        Alert.alert('Imagem de perfil atualizada com sucesso!');
       }
     } catch (error) {
-      console.error("Upload error: ", error);
-      Alert.alert("Erro", "Erro ao enviar imagem.");
+      console.error(error);
     }
+   
   };
 
   return (
