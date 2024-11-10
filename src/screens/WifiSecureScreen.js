@@ -14,11 +14,9 @@ import {useAuthStore} from '../stores/useAuthStore';
 import serverConfig from '../services/ServerConfig';
 
 const WifiSecureScreen = ({navigation}) => {
-  const {id, token} = useAuthStore();
+  const {id, token, loginLocationSecurity, latitude, longitude} = useAuthStore();
   const [radius, setRadius] = useState('50'); 
   const [location, setLocation] = useState(null);
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
 
   // Function to get actual location
   const getCurrentLocation = async () => {
@@ -76,6 +74,11 @@ const WifiSecureScreen = ({navigation}) => {
       if (!response.ok) {
         Alert.alert('Erro', 'Erro ao registrar ponto seguro!');
       } else {
+        useAuthStore.setState({
+          loginLocationSecurity: true,
+          latitude: location.latitude,
+          longitude: location.longitude,
+        });
         Alert.alert('Sucesso', 'Ponto seguro registrado com sucesso!');
       }
     } catch (error) {

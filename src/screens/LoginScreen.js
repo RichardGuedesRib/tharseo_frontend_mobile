@@ -6,6 +6,9 @@ import {
   TouchableOpacity,
   Image,
   StyleSheet,
+  Alert,
+  PermissionsAndroid,
+  BackHandler 
 } from 'react-native';
 import auth from '@react-native-firebase/auth';
 import {
@@ -20,6 +23,7 @@ import {useTransactionStore} from '../stores/useTransactionStore';
 import {useUserWalletStore} from '../stores/useUserWalletStore';
 import {useNavigation} from '@react-navigation/native';
 import {getAllAssetsServer} from '../services/AssetsService';
+import Geolocation from 'react-native-geolocation-service';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -28,6 +32,7 @@ export default function LoginScreen() {
   const {setGrids} = useStrategyGridStore();
   const {setTransactions} = useTransactionStore();
   const {setAssets} = useUserWalletStore();
+  const [location, setLocation] = useState(null);
   const navigation = useNavigation();
 
   useEffect(() => {
@@ -38,6 +43,105 @@ export default function LoginScreen() {
       forceCodeForRefreshToken: true,
     });
   }, []);
+
+  //Function to check if distance between two points is less than a certain radius
+  const checkLocationSecurity = async (latitude, longitude, radius) => {
+    try {
+      const currentLocation = await getCurrentLocation();
+      const distance = calculateDistance(
+        latitude,
+        longitude,
+        currentLocation.latitude,
+        currentLocation.longitude,
+      );
+
+      if (distance > radius) {
+        alert('Você está fora da área segura. Fechando o Tharseo');
+        navigation.navigate('Login');
+        setTimeout(() => {
+          Alert.alert(
+            'Aviso',
+            'O aplicativo será fechado por motivos de segurança.',
+            [{text: 'OK'}],
+          );
+          BackHandler.exitApp();
+        }, 5000);
+
+        return false;
+      }
+
+      alert('Você está na área segura! Bem vindo ao Tharseo!');
+      return true;
+    } catch (error) {
+      console.error('Erro ao obter a localização:', error);
+      alert('Não foi possível obter sua localização. Tentando novamente...');
+      return checkLocationSecurity(latitude, longitude, radius);
+    }
+  };
+
+  //Function to calculate distance between two points
+  const calculateDistance = (lat1, lon1, lat2, lon2) => {
+    const R = 6371;
+    const dLat = ((lat2 - lat1) * Math.PI) / 180;
+    const dLon = ((lon2 - lon1) * Math.PI) / 180;
+    const a =
+      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos((lat1 * Math.PI) / 180) *
+        Math.cos((lat2 * Math.PI) / 180) *
+        Math.sin(dLon / 2) *
+        Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  };
+
+  //Function to get location
+  const getCurrentLocation = () => {
+    return new Promise((resolve, reject) => {
+      requestLocationPermission().then(permissionGranted => {
+        if (permissionGranted) {
+          Geolocation.getCurrentPosition(
+            position => {
+              const {latitude, longitude} = position.coords;
+              setLocation({latitude, longitude});
+              resolve({latitude, longitude});
+            },
+            error => {
+              console.log(error.code, error.message);
+              setLocation(null);
+              Alert.alert('Erro', 'Não foi possível obter a localização.');
+              reject(error);
+            },
+            {enableHighAccuracy: true, timeout: 15000, maximumAge: 10000},
+          );
+        } else {
+          reject(new Error('Permissão negada.'));
+        }
+      });
+    });
+  };
+
+  //Function to get a permission to use location
+  const requestLocationPermission = async () => {
+    try {
+      const granted = await PermissionsAndroid.request(
+        PermissionsAndroid.PERMISSIONS.ACCESS_FINE_LOCATION,
+        {
+          title: 'Geolocation Permission',
+          message: 'Can we access your location?',
+          buttonNeutral: 'Ask Me Later',
+          buttonNegative: 'Cancel',
+          buttonPositive: 'OK',
+        },
+      );
+      if (granted === 'granted') {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (err) {
+      return false;
+    }
+  };
 
   //Function to make login with credencials
   const handleLogin = async () => {
@@ -51,7 +155,16 @@ export default function LoginScreen() {
       if (!response.ok) {
         alert('Usuário ou Senha Inválidos');
       } else {
+       
         const data = await response.json();
+       
+        if (data.data.user.loginLocationSecurity === true) {
+          const {latitude, longitude, radius} = data.data.user;
+          const isInSecureArea = await checkLocationSecurity(latitude, longitude, radius);
+          if (!isInSecureArea) {
+            return; 
+          }
+        }
         setUser(data);
 
         //Loading data from server to populate stores
@@ -82,6 +195,15 @@ export default function LoginScreen() {
       );
       const data = await response.json();
       if (response.ok) {
+
+        if (data.data.user.loginLocationSecurity === true) {
+          const {latitude, longitude, radius} = data.data.user;
+          const isInSecureArea = await checkLocationSecurity(latitude, longitude, radius);
+          if (!isInSecureArea) {
+            return; 
+          }
+        }
+        
         setUser(data);
 
         navigation.navigate('Home');
@@ -109,7 +231,21 @@ export default function LoginScreen() {
 
   const setUser = data => {
     const {user, accessToken, expiresIn} = data.data;
-    const {id, name, lastname, phoneNumber, email, avatar, wallet, grids, transactions, loginLocationSecurity, latitude, longitude, radius} = user;
+    const {
+      id,
+      name,
+      lastname,
+      phoneNumber,
+      email,
+      avatar,
+      wallet,
+      grids,
+      transactions,
+      loginLocationSecurity,
+      latitude,
+      longitude,
+      radius,
+    } = user;
     setAuth({
       id,
       name,
@@ -134,7 +270,7 @@ export default function LoginScreen() {
       <Image
         source={require('../Assets/img/launch_splash.png')}
         style={styles.logo}
-        resizeMode="contain" 
+        resizeMode="contain"
       />
 
       <TextInput
