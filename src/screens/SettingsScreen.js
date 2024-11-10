@@ -1,32 +1,80 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, Switch, TouchableOpacity } from 'react-native';
-import { useNavigation } from '@react-navigation/native';
+import React, {useState} from 'react';
+import {View, Text, StyleSheet, Switch, TouchableOpacity, Alert,} from 'react-native';
+import {useNavigation} from '@react-navigation/native';
+import {useAuthStore} from '../stores/useAuthStore';
+import serverConfig from '../services/ServerConfig';
 
 export default function SettingsScreen() {
   const [isNotificationsEnabled, setNotificationsEnabled] = useState(false);
   const [isPrivacyEnabled, setPrivacyEnabled] = useState(false);
-  const [isSafePointsEnabled, setSafePointsEnabled] = useState(false);
+  const [isSafePointsEnabled, setSafePointsEnabled] = useState(loginLocationSecurity);
+  const {id, token, loginLocationSecurity, latitude, longitude} = useAuthStore();
   const navigation = useNavigation();
+
 
   const handleWifiSecure = () => {
     navigation.navigate('WifiSecure');
-  }
+  };
 
+  //Function to toggle secure point
+  const toggleSecurePoint = async () => {
+    const newSafePointState = !isSafePointsEnabled;
+  
+    if (newSafePointState === true && (!latitude || !longitude)) {
+      Alert.alert('Erro', 'Defina uma localização para o ponto seguro em Adicionar!');
+      return; 
+    }
+  
+    setSafePointsEnabled(newSafePointState);
+
+    const urlRequest = `${serverConfig.addressServerTharseo}/users/${id}`;
+    const payload = {
+      loginLocationSecurity: newSafePointState,
+    };
+  
+    try {
+      const response = await fetch(urlRequest, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(payload),
+      });
+  
+      if (!response.ok) {
+        Alert.alert('Erro', 'Erro ao registrar ponto seguro!');
+        setSafePointsEnabled(!newSafePointState);
+      } else {
+        Alert.alert(
+          'Sucesso',
+          newSafePointState ? 'Login por ponto seguro ativado!' : 'Login por ponto seguro desativado!'
+        );
+        useAuthStore.setState({ loginLocationSecurity: newSafePointState });
+      }
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Erro', 'Ocorreu um erro ao registrar o ponto seguro.');
+      setSafePointsEnabled(!newSafePointState);
+    }
+  };
+  
   return (
     <View style={styles.container}>
       <Text style={styles.title}>CONFIGURAÇÕES</Text>
-      
+
       <View style={styles.card}>
         <View style={styles.cardHeader}>
           <Text style={styles.cardTitle}>Preferências de notificação</Text>
         </View>
         <Text style={styles.cardText}>
-          Configure para receber notificações relevantes na caixa de entrada do aplicativo e do site.
+          Configure para receber notificações relevantes na caixa de entrada do
+          aplicativo e do site.
         </Text>
         <View style={styles.toggleContainer}>
-          <Switch 
-            value={isNotificationsEnabled} 
-            onValueChange={setNotificationsEnabled} 
+          <Switch
+            value={isNotificationsEnabled}
+            onValueChange={setNotificationsEnabled}
           />
         </View>
       </View>
@@ -37,31 +85,30 @@ export default function SettingsScreen() {
           <Text style={styles.cardTitle}>Privacidade</Text>
         </View>
         <Text style={styles.cardText}>
-          O Tharseo pode compartilhar dados de uso com plataformas de análises de terceiros para aprimorar nossos produtos e marketing.
+          O Tharseo pode compartilhar dados de uso com plataformas de análises
+          de terceiros para aprimorar nossos produtos e marketing.
         </Text>
         <View style={styles.toggleContainer}>
-          <Switch 
-            value={isPrivacyEnabled} 
-            onValueChange={setPrivacyEnabled} 
-          />
+          <Switch value={isPrivacyEnabled} onValueChange={setPrivacyEnabled} />
         </View>
       </View>
 
       {/* Card de Pontos Seguros */}
       <View style={styles.card}>
         <View style={styles.cardHeader}>
-          <Text style={styles.cardTitle}>Pontos seguros</Text>
+          <Text style={styles.cardTitle}>Ponto seguro</Text>
           <TouchableOpacity style={styles.addButton} onPress={handleWifiSecure}>
             <Text style={styles.addButtonText}>Adicionar +</Text>
           </TouchableOpacity>
         </View>
         <Text style={styles.cardText}>
-          Com esta função ativa, você pode definir até 5 redes que considera seguras e detectamos como seguro as transações feitas nesse id.
+          Com esta função ativa, você pode definir uma zona que considera segura
+          para restringir o acesso ao Tharseo.
         </Text>
         <View style={styles.toggleContainer}>
-          <Switch 
-            value={isSafePointsEnabled} 
-            onValueChange={setSafePointsEnabled} 
+          <Switch
+            value={isSafePointsEnabled}
+            onValueChange={toggleSecurePoint}
           />
         </View>
       </View>
@@ -116,4 +163,3 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
   },
 });
-

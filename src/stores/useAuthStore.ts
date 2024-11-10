@@ -9,6 +9,10 @@ interface AuthState {
   avatar: string | null;
   token: string | null;
   expiration: number | null;
+  loginLocationSecurity: boolean | null;
+  latitude: string | null;
+  longitude: string | null;
+  radius: string | null;
   setAvatar: (newAvatar: string) => void;
   setAuth: (authData: Partial<AuthState>) => void;
   clearAuth: () => void;
@@ -23,6 +27,10 @@ export const useAuthStore = create<AuthState>((set) => ({
   avatar: null,
   token: null,
   expiration: null,
+  loginLocationSecurity: null,
+  latitude: null,
+  longitude: null,
+  radius: null,
   setAvatar: (newAvatar) => set({ avatar: newAvatar }),
   setAuth: (authData) => set((state) => ({ ...state, ...authData })),
   clearAuth: () =>
@@ -35,5 +43,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       avatar: null,
       token: null,
       expiration: null,
+      loginLocationSecurity: null,
+      latitude: null,
+      longitude: null,
+      radius: null,
     }),
 }));
